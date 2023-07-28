@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.VarChar(8000)
+  expiresAt DateTime
+}
+
+model User {
+  id               Int        @id @default(autoincrement())
+  firstName        String     @db.VarChar(256)
+  lastName         String?    @db.VarChar(256)
+  phoneNumber      String?
+  voucherCode      String?    @db.VarChar(512)
+  email            String     @unique @db.VarChar(256)
+  password         String
+  country          String?    @db.VarChar(256)
+  timezone         String?    @db.VarChar(256)
+  tagline          String?    @db.VarChar(512)
+  bio              String?    @db.VarChar(512)
+  createdSubjects  Subject[]  @relation("CreatedSubjects")
+  updatedSubjects  Subject[]  @relation("UpdatedSubjects")
+  createdTopics    Topic[]    @relation("CreatedTopics")
+  updatedTopics    Topic[]    @relation("UpdatedTopics")
+  createdQuestions Question[] @relation("CreatedQuestions")
+  updatedQuestions Question[] @relation("UpdatedQuestions")
+  createdImages    Image[]    @relation("CreatedImages")
+  updatedImages    Image[]    @relation("UpdatedImages")
+  createdOptions   Option[]   @relation("CreatedOptions")
+  updatedOptions   Option[]   @relation("UpdatedOptions")
+  createdExams     Exam[]     @relation("CreatedExams")
+  updatedExams     Exam[]     @relation("UpdatedExams")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Exam {
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(256)
+  description    String    @db.VarChar(128)
+  totalTime      Int
+  totalMarks     Int
+  totalQuestions Int
+  Subject        Subject[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdBy      User      @relation("CreatedExams", fields: [createdById], references: [id])
+  createdById    Int
+  updatedBy      User?     @relation("UpdatedExams", fields: [updatedById], references: [id])
+  updatedById    Int?
+}
+
+model Subject {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(256)
+  description String   @db.VarChar(128)
+  topics      Topic[]
+  exam        Exam[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation("CreatedSubjects", fields: [createdById], references: [id])
+  createdById Int
+  updatedBy   User?    @relation("UpdatedSubjects", fields: [updatedById], references: [id])
+  updatedById Int?
+}
+
+model Topic {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(256)
+  description String     @db.VarChar(128)
+  subject     Subject    @relation(fields: [subjectId], references: [id])
+  subjectId   Int
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   User       @relation("CreatedTopics", fields: [createdById], references: [id])
+  createdById Int
+  updatedBy   User?      @relation("UpdatedTopics", fields: [updatedById], references: [id])
+  updatedById Int?
+}
+
+model Question {
+  id                Int                @id @default(autoincrement())
+  description       String             @db.VarChar(255)
+  type              QuestionType
+  complexity        QuestionComplexity
+  images            Image[]
+  topic             Topic              @relation(fields: [topicId], references: [id])
+  topicId           Int
+  options           Option[]
+  answerExplanation String             @db.VarChar(255)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  createdBy         User               @relation("CreatedQuestions", fields: [createdById], references: [id])
+  createdById       Int
+  updatedBy         User?              @relation("UpdatedQuestions", fields: [updatedById], references: [id])
+  updatedById       Int?
+}
+
+model Option {
+  id          Int      @id @default(autoincrement())
+  description String   @db.VarChar(128)
+  isAnswer    Boolean
+  question    Question @relation(fields: [questionId], references: [id])
+  questionId  Int
+  images      Image[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation("CreatedOptions", fields: [createdById], references: [id])
+  createdById Int
+  updatedBy   User?    @relation("UpdatedOptions", fields: [updatedById], references: [id])
+  updatedById Int?
+}
+
+model Image {
+  id          Int       @id @default(autoincrement())
+  description String    @db.VarChar(128)
+  url         String
+  question    Question? @relation(fields: [questionId], references: [id])
+  questionId  Int?
+  options     Option?   @relation(fields: [optionsId], references: [id])
+  optionsId   Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User      @relation("CreatedImages", fields: [createdById], references: [id])
+  createdById Int
+  updatedBy   User      @relation("UpdatedImages", fields: [updatedById], references: [id])
+  updatedById Int
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum QuestionType {
+  MCQ1
+  MCQ2
+  BLANKS
+  TRUEFALSE
+  SUBJECTIVE
+}
+
+enum QuestionComplexity {
+  EASY
+  MEDIUM
+  HARD
+}
