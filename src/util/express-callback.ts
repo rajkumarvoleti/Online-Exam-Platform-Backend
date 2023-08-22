@@ -4,8 +4,8 @@ import { catchErrors } from "../handlers/errorHandlers"
 
 export default function makeExpressCallback (controller: any) {
   return (req:Request, res:Response) => {
-    console.log("line 7");
-    console.log(req.session.id);
+    // console.log("line 7");
+    // console.log(req.session.id);
     const httpRequest:IHttpRequest = {
       body: req.body,
       query: req.query,

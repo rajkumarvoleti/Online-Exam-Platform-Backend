@@ -12,6 +12,8 @@ const errorHandlers_1 = require("./handlers/errorHandlers");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const subjectRoutes_1 = __importDefault(require("./routes/subjectRoutes"));
 const topicRoutes_1 = __importDefault(require("./routes/topicRoutes"));
+const questionRoutes_1 = __importDefault(require("./routes/questionRoutes"));
+const examRoutes_1 = __importDefault(require("./routes/examRoutes"));
 const app = (0, express_1.default)();
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use(express_1.default.json());
@@ -23,6 +25,8 @@ app.use(session_1.appSession);
 app.use("/api/users", userRoutes_1.default);
 app.use("/api/subject", subjectRoutes_1.default);
 app.use("/api/topic", topicRoutes_1.default);
+app.use("/api/question", questionRoutes_1.default);
+app.use("/api/exam", examRoutes_1.default);
 app.get("/", (req, res) => {
     res.send(`Hello world! ${process.env.PROJECT_NAME}`);
 });

@@ -29,8 +29,17 @@ const createTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.createTopic = createTopic;
 const getTopics = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    const { subjectId } = req.body;
-    const topics = yield db_1.topicDb.getTopics({ subjectId });
+    const { subjectId } = req.query;
+    const data = yield db_1.topicDb.getTopics({ subjectId: parseInt(subjectId, 10) });
+    const topics = data.map(topic => {
+        return {
+            description: topic.description,
+            name: topic.name,
+            subjectId: topic.subjectId,
+            id: topic.id,
+            questionsCount: topic._count.questions
+        };
+    });
     return {
         statusCode: 200,
         headers: {
@@ -63,13 +72,13 @@ const deleteTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
             body: { msg: "Invalid request. Id is not present" }
         };
     }
-    yield db_1.topicDb.deleteTopic(id);
+    const topic = yield db_1.topicDb.deleteTopic(id);
     return {
         statusCode: 200,
         headers: {
             'Content-Type': 'application/json',
         },
-        body: { msg: "Deleted Successfully" }
+        body: { msg: "Deleted Successfully", topic }
     };
 });
 exports.deleteTopic = deleteTopic;

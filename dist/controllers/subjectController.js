@@ -9,14 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSubject = exports.updateSubject = exports.getAllSubjects = exports.createSubject = void 0;
+exports.deleteSubject = exports.updateSubject = exports.getSubject = exports.getAllSubjects = exports.createSubject = void 0;
 const db_1 = require("../db");
 const createSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
+    console.log({ userId: data.userId });
     const subjectData = {
         name: data.subjectData.name,
         description: data.subjectData.description,
-        topics: data.subjectData.topics,
+        topicsCount: 0,
     };
     const subject = yield db_1.subjectDb.createSubject({ subjectData, userId: data.userId });
     return {
@@ -29,7 +30,15 @@ const createSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.createSubject = createSubject;
 const getAllSubjects = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    const subjects = yield db_1.subjectDb.getAllSubjects();
+    const data = yield db_1.subjectDb.getAllSubjects();
+    const subjects = data.map(subject => {
+        return {
+            description: subject.description,
+            name: subject.name,
+            topicsCount: subject._count.topics,
+            id: subject.id
+        };
+    });
     return {
         statusCode: 200,
         headers: {
@@ -39,10 +48,28 @@ const getAllSubjects = (req) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 exports.getAllSubjects = getAllSubjects;
+const getSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = JSON.parse(req.query.subjectId);
+    const data = yield db_1.subjectDb.getSubject(id);
+    const subject = {
+        id: data.id,
+        description: data.description,
+        name: data.name,
+        topicsCount: data._count.topics,
+    };
+    return {
+        statusCode: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: { subject }
+    };
+});
+exports.getSubject = getSubject;
 const updateSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const { subjectData, id } = req.body;
     console.log({ subjectData, id });
-    const subject = db_1.subjectDb.editSubject({ subjectData, id });
+    const subject = yield db_1.subjectDb.editSubject({ subjectData, id });
     return {
         statusCode: 200,
         headers: {

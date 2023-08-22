@@ -27,12 +27,21 @@ export default function makeTopicDb({ makeDb }: { makeDb: () => IDatabase }) {
   async function getTopics({ subjectId }: { subjectId: number }) {
     const db = makeDb();
     const topics = await db.topic.findMany({
+      where: {
+        subjectId
+      },
       select: {
         id: true,
         name: true,
         description: true,
+        subjectId: true,
+        _count: {
+          select: {
+            questions: true,
+          }
+        }
       }
-    })
+    });
     return topics;
   }
 
@@ -52,12 +61,30 @@ export default function makeTopicDb({ makeDb }: { makeDb: () => IDatabase }) {
 
   async function deleteTopic(id: number) {
     const db = makeDb();
-    await db.topic.delete({
+    const topic = await db.topic.delete({
       where: {
         id
       }
     })
+    return topic;
   }
 
-  return { createTopic, getTopics, deleteTopic, editTopic };
+  async function getQuestions(topicId: number) {
+    const db = makeDb();
+    const questions = await db.topic.findUnique({
+      where: {
+        id: topicId
+      },
+      select: {
+        questions: {
+          select: {
+            id: true,
+          }
+        }
+      }
+    })
+    return questions;
+  }
+
+  return { createTopic, getTopics, deleteTopic, editTopic, getQuestions };
 }

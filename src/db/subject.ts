@@ -1,3 +1,4 @@
+import { subjectDb } from ".";
 import { IDatabase } from "../interfaces/db";
 import { ISubject } from "../interfaces/exam";
 
@@ -26,11 +27,29 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
         id: true,
         name: true,
         description: true,
-        topics: {
+        _count: {
           select: {
-            name: true,
-            description: true,
-            id: true
+            topics: true,
+          }
+        }
+      }
+    })
+    return subjects;
+  }
+
+  async function getSubject(id:number) {
+    const db = makeDb();
+    const subjects = await db.subject.findUnique({
+      where:{
+        id
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        _count: {
+          select: {
+            topics: true
           }
         }
       }
@@ -61,5 +80,27 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
     })
   }
 
-  return { createSubject, getAllSubjects, deleteSubject, editSubject };
+  async function getTopics(subjectId:number) {
+    const db = makeDb();
+
+    const topics = await db.subject.findUnique({
+      where: { id: subjectId},
+      select: {
+        topics:{
+          select: {
+            id: true,
+            questions: {
+              select: {
+                id: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return topics;
+  }
+
+  return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject };
 }

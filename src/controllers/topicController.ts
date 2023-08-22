@@ -1,5 +1,5 @@
-import { subjectDb, topicDb } from "../db";
-import { ISubject, ITopic } from "../interfaces/exam";
+import { topicDb } from "../db";
+import { ITopic } from "../interfaces/exam";
 import { IHttpRequest } from "../interfaces/http";
 
 export const createTopic = async (req: IHttpRequest) => {
@@ -22,8 +22,17 @@ export const createTopic = async (req: IHttpRequest) => {
 }
 
 export const getTopics = async (req: IHttpRequest) => {
-  const { subjectId } = req.body
-  const topics = await topicDb.getTopics({ subjectId });
+  const { subjectId } = req.query
+  const data = await topicDb.getTopics({ subjectId:parseInt(subjectId, 10) });
+  const topics:ITopic[] = data.map(topic => {
+    return {
+      description: topic.description,
+      name: topic.name,
+      subjectId: topic.subjectId,
+      id: topic.id,
+      questionsCount: topic._count.questions
+    }
+  })
   return {
     statusCode: 200,
     headers: {
@@ -56,12 +65,12 @@ export const deleteTopic = async (req: IHttpRequest) => {
       body: { msg: "Invalid request. Id is not present" }
     }
   }
-  await topicDb.deleteTopic(id);
+  const topic = await topicDb.deleteTopic(id);
   return {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
     },
-    body: { msg: "Deleted Successfully" }
+    body: { msg: "Deleted Successfully", topic }
   };
 }

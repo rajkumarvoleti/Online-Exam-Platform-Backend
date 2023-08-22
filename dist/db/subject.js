@@ -35,11 +35,30 @@ function makeSubjectDb({ makeDb }) {
                     id: true,
                     name: true,
                     description: true,
-                    topics: {
+                    _count: {
                         select: {
-                            name: true,
-                            description: true,
-                            id: true
+                            topics: true,
+                        }
+                    }
+                }
+            });
+            return subjects;
+        });
+    }
+    function getSubject(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const subjects = yield db.subject.findUnique({
+                where: {
+                    id
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    _count: {
+                        select: {
+                            topics: true
                         }
                     }
                 }
@@ -72,7 +91,28 @@ function makeSubjectDb({ makeDb }) {
             });
         });
     }
-    return { createSubject, getAllSubjects, deleteSubject, editSubject };
+    function getTopics(subjectId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const topics = yield db.subject.findUnique({
+                where: { id: subjectId },
+                select: {
+                    topics: {
+                        select: {
+                            id: true,
+                            questions: {
+                                select: {
+                                    id: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            return topics;
+        });
+    }
+    return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject };
 }
 exports.default = makeSubjectDb;
 //# sourceMappingURL=subject.js.map

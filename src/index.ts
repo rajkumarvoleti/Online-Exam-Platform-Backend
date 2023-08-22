@@ -7,6 +7,8 @@ import { developmentErrors, notFound, productionErrors } from './handlers/errorH
 import cookieParser from 'cookie-parser';
 import subjectRouter from "./routes/subjectRoutes";
 import topicRouter from "./routes/topicRoutes";
+import questionRouter from "./routes/questionRoutes";
+import examRouter from "./routes/examRoutes";
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(session);
 app.use("/api/users", userRouter);
 app.use("/api/subject", subjectRouter);
 app.use("/api/topic", topicRouter);
+app.use("/api/question", questionRouter);
+app.use("/api/exam", examRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send(`Hello world! ${process.env.PROJECT_NAME}`);

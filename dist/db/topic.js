@@ -36,10 +36,19 @@ function makeTopicDb({ makeDb }) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = makeDb();
             const topics = yield db.topic.findMany({
+                where: {
+                    subjectId
+                },
                 select: {
                     id: true,
                     name: true,
                     description: true,
+                    subjectId: true,
+                    _count: {
+                        select: {
+                            questions: true,
+                        }
+                    }
                 }
             });
             return topics;
@@ -63,14 +72,33 @@ function makeTopicDb({ makeDb }) {
     function deleteTopic(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = makeDb();
-            yield db.topic.delete({
+            const topic = yield db.topic.delete({
                 where: {
                     id
                 }
             });
+            return topic;
         });
     }
-    return { createTopic, getTopics, deleteTopic, editTopic };
+    function getQuestions(topicId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const questions = yield db.topic.findUnique({
+                where: {
+                    id: topicId
+                },
+                select: {
+                    questions: {
+                        select: {
+                            id: true,
+                        }
+                    }
+                }
+            });
+            return questions;
+        });
+    }
+    return { createTopic, getTopics, deleteTopic, editTopic, getQuestions };
 }
 exports.default = makeTopicDb;
 //# sourceMappingURL=topic.js.map

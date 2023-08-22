@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const errorHandlers_1 = require("../handlers/errorHandlers");
 function makeExpressCallback(controller) {
     return (req, res) => {
-        console.log("line 7");
-        console.log(req.session.id);
+        // console.log("line 7");
+        // console.log(req.session.id);
         const httpRequest = {
             body: req.body,
             query: req.query,

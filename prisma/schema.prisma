@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model Session {
@@ -46,48 +47,71 @@ model User {
 }
 
 model Exam {
-  id             Int       @id @default(autoincrement())
-  name           String    @db.VarChar(256)
-  description    String    @db.VarChar(128)
-  totalTime      Int
-  totalMarks     Int
-  totalQuestions Int
-  Subject        Subject[]
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  createdBy      User      @relation("CreatedExams", fields: [createdById], references: [id])
-  createdById    Int
-  updatedBy      User?     @relation("UpdatedExams", fields: [updatedById], references: [id])
-  updatedById    Int?
+  id                    Int           @id @default(autoincrement())
+  name                  String        @db.VarChar(256)
+  description           String        @db.VarChar(128)
+  testAvailabilityStart DateTime      @default(now())
+  testAvailabilityEnd   DateTime      @default(now())
+  totalTime             Int
+  totalMarks            Int
+  totalQuestions        Int
+  subjects              ExamSubject[]
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  createdBy             User          @relation("CreatedExams", fields: [createdById], references: [id])
+  createdById           Int
+  updatedBy             User?         @relation("UpdatedExams", fields: [updatedById], references: [id])
+  updatedById           Int?
 }
 
 model Subject {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(256)
-  description String   @db.VarChar(128)
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(256)
+  description String        @db.VarChar(128)
   topics      Topic[]
-  exam        Exam[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   User     @relation("CreatedSubjects", fields: [createdById], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdBy   User          @relation("CreatedSubjects", fields: [createdById], references: [id])
   createdById Int
-  updatedBy   User?    @relation("UpdatedSubjects", fields: [updatedById], references: [id])
+  updatedBy   User?         @relation("UpdatedSubjects", fields: [updatedById], references: [id])
   updatedById Int?
+  ExamSubject ExamSubject[]
+}
+
+model ExamTopic {
+  id                Int          @id @default(autoincrement())
+  topic             Topic        @relation(fields: [topicId], references: [id])
+  topicId           Int
+  numberOfQuestions Int
+  ExamSubject       ExamSubject? @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
+  examSubjectId     Int?
+}
+
+model ExamSubject {
+  id                Int         @id @default(autoincrement())
+  subject           Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics            ExamTopic[]
+  numberOfQuestions Int
+  examId            Int?
+  subjectId         Int
+  Exam              Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  questions         Question[]
 }
 
 model Topic {
-  id          Int        @id @default(autoincrement())
-  name        String     @db.VarChar(256)
-  description String     @db.VarChar(128)
-  subject     Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(256)
+  description String      @db.VarChar(128)
+  subject     Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId   Int
   questions   Question[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  createdBy   User       @relation("CreatedTopics", fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdBy   User        @relation("CreatedTopics", fields: [createdById], references: [id], onDelete: Cascade)
   createdById Int
-  updatedBy   User?      @relation("UpdatedTopics", fields: [updatedById], references: [id])
+  updatedBy   User?       @relation("UpdatedTopics", fields: [updatedById], references: [id], onDelete: Cascade)
   updatedById Int?
+  ExamTopic   ExamTopic[]
 }
 
 model Question {
@@ -99,13 +123,17 @@ model Question {
   topic             Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
   topicId           Int
   options           Option[]
+  answer            String             @default("") @db.VarChar(255)
   answerExplanation String             @db.VarChar(255)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  createdBy         User               @relation("CreatedQuestions", fields: [createdById], references: [id])
+  createdBy         User               @relation("CreatedQuestions", fields: [createdById], references: [id], onDelete: Cascade)
   createdById       Int
-  updatedBy         User?              @relation("UpdatedQuestions", fields: [updatedById], references: [id])
+  updatedBy         User?              @relation("UpdatedQuestions", fields: [updatedById], references: [id], onDelete: Cascade)
   updatedById       Int?
+  examTopicId       Int?
+  ExamSubject       ExamSubject?       @relation(fields: [examSubjectId], references: [id])
+  examSubjectId     Int?
 }
 
 model Option {
@@ -146,15 +174,14 @@ enum Role {
 }
 
 enum QuestionType {
-  MCQ1
-  MCQ2
-  BLANKS
-  TRUEFALSE
-  SUBJECTIVE
+  trueOrFalse
+  fillInTheBlanks
+  multipleChoice
+  subjective
 }
 
 enum QuestionComplexity {
-  EASY
-  MEDIUM
-  HARD
+  easy
+  medium
+  hard
 }

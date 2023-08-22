@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE `user` ADD COLUMN `bio` VARCHAR(512) NULL,
-    ADD COLUMN `country` VARCHAR(256) NULL,
-    ADD COLUMN `tagline` VARCHAR(512) NULL,
-    ADD COLUMN `timezone` VARCHAR(256) NULL;
