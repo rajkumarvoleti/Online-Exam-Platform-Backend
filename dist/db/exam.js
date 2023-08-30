@@ -30,7 +30,7 @@ function makeExamDb({ makeDb }) {
                     connect: { id: data.userId }
                 }
             }
-        });
+        }).catch((e) => console.log(e));
         return exam;
     });
     const deleteAll = () => __awaiter(this, void 0, void 0, function* () {

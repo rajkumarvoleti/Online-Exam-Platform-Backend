@@ -148,6 +148,30 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     return questions;
   }
 
+  async function getAnswer(id:number) {
+    const db = makeDb();
+    const question = await db.question.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        type: true,
+        answer: true,
+        options: {
+          select: {
+            description: true,
+            isAnswer: true,
+          }
+        }
+      }
+    })
+
+    if(question.type === "multipleChoice" || question.type === "trueOrFalse")
+      return question.options.find(opt => opt.isAnswer).description;
+
+    return question.answer;
+  }
+
   async function getAllQuestions() {
     const db = makeDb();
     const questions = await db.question.findMany({
@@ -230,5 +254,5 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     return data.topicId;
   }
 
-  return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions,getManyQuestions, deleteQuestions };
+  return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions,getManyQuestions, deleteQuestions, getAnswer };
 }

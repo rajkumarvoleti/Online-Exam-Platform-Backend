@@ -158,6 +158,29 @@ function makeQuestionDb({ makeDb }) {
             return questions;
         });
     }
+    function getAnswer(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const question = yield db.question.findUnique({
+                where: {
+                    id,
+                },
+                select: {
+                    type: true,
+                    answer: true,
+                    options: {
+                        select: {
+                            description: true,
+                            isAnswer: true,
+                        }
+                    }
+                }
+            });
+            if (question.type === "multipleChoice" || question.type === "trueOrFalse")
+                return question.options.find(opt => opt.isAnswer).description;
+            return question.answer;
+        });
+    }
     function getAllQuestions() {
         return __awaiter(this, void 0, void 0, function* () {
             const db = makeDb();
@@ -243,7 +266,7 @@ function makeQuestionDb({ makeDb }) {
             return data.topicId;
         });
     }
-    return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions, getManyQuestions, deleteQuestions };
+    return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions, getManyQuestions, deleteQuestions, getAnswer };
 }
 exports.default = makeQuestionDb;
 //# sourceMappingURL=question.js.map

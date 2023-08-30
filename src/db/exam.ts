@@ -25,7 +25,7 @@ export default function makeExamDb({ makeDb }: { makeDb: () => IDatabase }) {
           connect:{id: data.userId}
         }
       }
-    })
+    }).catch((e:any) => console.log(e));
     return exam
   }
 

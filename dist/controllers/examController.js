@@ -9,16 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExam = exports.deleteAllExams = exports.getAllExams = exports.createExam = void 0;
+exports.getResult = exports.getExam = exports.deleteAllExams = exports.getAllExams = exports.createExam = void 0;
 const examHandler_1 = require("../handlers/examHandler");
 const db_1 = require("../db");
 const createExam = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const { testData } = req.body;
+    console.log(testData);
     let examSubjects = [];
     yield Promise.all(testData.subjects.map((subject, i) => __awaiter(void 0, void 0, void 0, function* () {
         const updatedSubject = yield (0, examHandler_1.getRandomQuestionsSubject)(subject);
         examSubjects = [...examSubjects, updatedSubject];
     })));
+    console.log("hello");
     const examSubjectIds = yield (0, examHandler_1.createExamSubjects)(examSubjects);
     const examDetails = {
         description: testData.description,
@@ -35,9 +37,9 @@ const createExam = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return {
         statusCode: 201,
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
-        body: { exam }
+        body: { exam },
     };
 });
 exports.createExam = createExam;
@@ -46,9 +48,9 @@ const getAllExams = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return {
         statusCode: 200,
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
-        body: { exams }
+        body: { exams },
     };
 });
 exports.getAllExams = getAllExams;
@@ -57,9 +59,9 @@ const deleteAllExams = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return {
         statusCode: 200,
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
-        body: { msg: "Deleted Successfully" }
+        body: { msg: "Deleted Successfully" },
     };
 });
 exports.deleteAllExams = deleteAllExams;
@@ -69,10 +71,29 @@ const getExam = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return {
         statusCode: 200,
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
-        body: { exam }
+        body: { exam },
     };
 });
 exports.getExam = getExam;
+const getResult = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = req.query.data;
+    let score = 0;
+    yield Promise.all(data.map(({ id, response }) => __awaiter(void 0, void 0, void 0, function* () {
+        const answer = yield db_1.questionDb.getAnswer(parseInt(id, 10));
+        console.log({ answer, response });
+        if (answer === response)
+            score = score + 1;
+    })));
+    console.log(score);
+    return {
+        statusCode: 200,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: { score },
+    };
+});
+exports.getResult = getResult;
 //# sourceMappingURL=examController.js.map
