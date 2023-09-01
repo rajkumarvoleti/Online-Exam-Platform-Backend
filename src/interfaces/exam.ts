@@ -12,6 +12,14 @@ export interface ISubject {
   description: string,
   topicsCount?: number,
 }
+export interface IQuestionBank {
+  id: number,
+  name: string,
+  totalQuestions: number,
+  easyQuestionsCount: number,
+  mediumQuestionsCount: number,
+  hardQuestionsCount: number,
+}
 
 export interface IOption {
   description: string,

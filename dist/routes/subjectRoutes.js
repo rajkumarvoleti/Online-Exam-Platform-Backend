@@ -11,6 +11,7 @@ subjectRouter.post("/create", (0, express_callback_1.default)(subjectController_
 subjectRouter.post("/update", (0, express_callback_1.default)(subjectController_1.updateSubject));
 subjectRouter.get("/getAll", (0, express_callback_1.default)(subjectController_1.getAllSubjects));
 subjectRouter.get("/get", (0, express_callback_1.default)(subjectController_1.getSubject));
+subjectRouter.get("/getQuestionBanks", (0, express_callback_1.default)(subjectController_1.getAllQuestionBanks));
 subjectRouter.delete("/delete", (0, express_callback_1.default)(subjectController_1.deleteSubject));
 exports.default = subjectRouter;
 //# sourceMappingURL=subjectRoutes.js.map

@@ -112,7 +112,29 @@ function makeSubjectDb({ makeDb }) {
             return topics;
         });
     }
-    return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject };
+    function getAllQuestionBanks() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const questionBanks = yield db.subject.findMany({
+                where: {},
+                select: {
+                    id: true,
+                    name: true,
+                    topics: {
+                        select: {
+                            questions: {
+                                select: {
+                                    complexity: true,
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            return questionBanks;
+        });
+    }
+    return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject, getAllQuestionBanks };
 }
 exports.default = makeSubjectDb;
 //# sourceMappingURL=subject.js.map

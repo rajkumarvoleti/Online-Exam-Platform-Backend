@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSubject = exports.updateSubject = exports.getSubject = exports.getAllSubjects = exports.createSubject = void 0;
+exports.deleteSubject = exports.updateSubject = exports.getSubject = exports.getAllQuestionBanks = exports.getAllSubjects = exports.createSubject = void 0;
 const db_1 = require("../db");
 const createSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
@@ -48,6 +48,29 @@ const getAllSubjects = (req) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 exports.getAllSubjects = getAllSubjects;
+const getAllQuestionBanks = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield db_1.subjectDb.getAllQuestionBanks();
+    // console.log(data);
+    const questionBanks = data.map(subject => {
+        return {
+            id: subject.id,
+            name: subject.name,
+            totalQuestions: subject.topics.map(topic => topic.questions.length).reduce((prev, curr) => prev + curr, 0),
+            easyQuestionsCount: subject.topics.map(topic => topic.questions.filter(question => question.complexity === "easy").length).reduce((prev, curr) => prev + curr, 0),
+            mediumQuestionsCount: subject.topics.map(topic => topic.questions.filter(question => question.complexity === "medium").length).reduce((prev, curr) => prev + curr, 0),
+            hardQuestionsCount: subject.topics.map(topic => topic.questions.filter(question => question.complexity === "hard").length).reduce((prev, curr) => prev + curr, 0),
+        };
+    });
+    console.log(questionBanks);
+    return {
+        statusCode: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: { questionBanks }
+    };
+});
+exports.getAllQuestionBanks = getAllQuestionBanks;
 const getSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const id = JSON.parse(req.query.subjectId);
     const data = yield db_1.subjectDb.getSubject(id);

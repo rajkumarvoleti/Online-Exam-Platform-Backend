@@ -102,5 +102,26 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
     return topics;
   }
 
-  return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject };
+  async function getAllQuestionBanks() {
+    const db = makeDb();
+    const questionBanks = await db.subject.findMany({
+      where: {},
+      select: {
+        id: true,
+        name: true,
+        topics: {
+          select: {
+            questions: {
+              select: {
+                complexity: true,
+              }
+            }
+          }
+        }
+      }
+    })
+    return questionBanks;
+  }
+
+  return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject, getAllQuestionBanks };
 }
