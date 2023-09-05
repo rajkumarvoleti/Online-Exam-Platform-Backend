@@ -1,28 +1,42 @@
 import { Prisma } from "@prisma/client";
 import { IDatabase } from "../interfaces/db";
-import { IExam } from "../interfaces/exam";
+import { ICreateTestData } from "../interfaces/exam";
 
 export default function makeExamDb({ makeDb }: { makeDb: () => IDatabase }) {
 
   const db = makeDb();
 
-  const createExam = async (data:IExam) => {
+  const createExam = async ({userId,data,questions}:{userId:number,data:ICreateTestData,questions:number[]},) => {
+    const {testDetails, testSettings, pricing} = data;
+    const testPrice = pricing.testType === "open" ? 0 : pricing.price;
+    const testDuration = testSettings.testDurationAvailability === "always" ? 0 : testSettings.testDuration;
+    const testStartDate = testSettings.testDateAvailability === "always" ? "always" : testSettings.testStartDate;
+    const testEndDate = testSettings.testDateAvailability === "always" ? "always" : testSettings.testEndDate;
+    const testStartTime = testSettings.testTimeAvailability === "always" ? "always" : testSettings.testStartTime;
+    const testEndTime = testSettings.testTimeAvailability === "always" ? "always" : testSettings.testEndTime;
+
+
     const exam = db.exam.create({
       data:{
-        description:data.description,
-        name: data.name,
-        totalMarks: data.totalMarks,
-        totalQuestions: data.totalMarks,
-        totalTime: data.totalTime,
-        testAvailabilityStart: data.testAvailabilityStart,
-        testAvailabilityEnd: data.testAvailabilityEnd,
-        subjects: {
-          connect: data.subjectIds.map(id => {
-            return {id}
+        description: testDetails.testDescription,
+        name: testDetails.testName,
+        negativeMarks: testSettings.negativeMarks,
+        passPercentage: testSettings.passPercentage,
+        price: testPrice,
+        testDuration,
+        totalMarks: data.testSettings.totalMarks,
+        totalQuestions: data.testDetails.totalQuestions,
+        testStartDate,
+        testEndDate,
+        testStartTime,
+        testEndTime,
+        questions: {
+          connect: questions.map(question => {
+            return {id:question}
           }),
         },
         createdBy: {
-          connect:{id: data.userId}
+          connect:{id: userId}
         }
       }
     }).catch((e:any) => console.log(e));
@@ -37,62 +51,26 @@ export default function makeExamDb({ makeDb }: { makeDb: () => IDatabase }) {
 
   const getExam = async(id:number) => {
     const exam = await db.exam.findUnique({
-      where: {
-        id
-      },
+      where: {id},
       select: {
         id: true,
-        name: true,
-        description: true,
-        testAvailabilityStart: true,
-        testAvailabilityEnd: true,
-        totalMarks: true,
-        totalQuestions: true,
-        totalTime: true,
-        subjects: {
+        questions: {
           select: {
-            numberOfQuestions: true,
-            questions: {
-              select: {
-                id: true,
-                description: true,
-                type: true,
-                options: {
-                  select: {
-                    description: true
-                  }
-                },
-              }
-            }
+            complexity: true,
+            id: true,
+            options: true,
+            description: true,
+            type: true,
           }
-        }
+        },
+        testDuration: true,
       }
     })
     return exam;
   }
 
   const getAllExams = async() => {
-    const exams = await db.exam.findMany({
-      where:{},
-      select: {
-        subjects: {
-          include: {
-            questions: {
-              select: {id: true},
-            },
-            topics: true,
-          }
-        },
-        description: true,
-        id: true,
-        name: true,
-        testAvailabilityStart: true,
-        testAvailabilityEnd: true,
-        totalMarks: true,
-        totalQuestions: true,
-        totalTime: true
-      }
-    })
+    const exams = db.exam.findMany();
     return exams;
   }
 

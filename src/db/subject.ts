@@ -1,4 +1,3 @@
-import { subjectDb } from ".";
 import { IDatabase } from "../interfaces/db";
 import { ISubject } from "../interfaces/exam";
 
@@ -90,9 +89,13 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
           select: {
             id: true,
             questions: {
+              where: {
+                isActive: true,
+              },
               select: {
-                id: true
-              }
+                id: true,
+                complexity: true,
+              },
             }
           }
         }
@@ -112,6 +115,9 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
         topics: {
           select: {
             questions: {
+              where: {
+                isActive: true,
+              },
               select: {
                 complexity: true,
               }

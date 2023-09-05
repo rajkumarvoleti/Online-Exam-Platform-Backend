@@ -9,60 +9,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createExamSubjects = exports.getRandomQuestionsSubject = exports.getRandomQuestionsSubjectId = exports.getRandomQuestionsTopic = void 0;
+exports.getQuestionsFromBank = void 0;
 const db_1 = require("../db");
-const getRandomQuestionsTopic = (topic) => __awaiter(void 0, void 0, void 0, function* () {
-    if (topic.numberOfQuestions < 1)
-        return [];
-    const { questions } = yield db_1.topicDb.getQuestions(topic.topicId);
-    if (questions.length < topic.numberOfQuestions) {
-        console.log(`insufficient questions in the database. question in data base: ${questions.length}, questionsNeeded: ${topic.numberOfQuestions}`);
-        return;
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
-    const questionIds = questions.map(question => question.id);
-    const randomQuestionIds = questionIds.sort(() => 0.5 - Math.random()).slice(0, topic.numberOfQuestions);
-    // const randomQuestions = await questionDb.getManyQuestions(randomQuestionIds);
-    // const examQuestions = randomQuestions.map(randomQuestion => createQuestionData(randomQuestion));
-    return randomQuestionIds;
+}
+function getRandomSubarray(array, size) {
+    shuffleArray(array);
+    return array.slice(0, size);
+}
+const getQuestionsFromBank = (bank) => __awaiter(void 0, void 0, void 0, function* () {
+    const topics = yield db_1.subjectDb.getTopics(bank.id);
+    const allQuestions = topics.topics.map(topic => topic.questions).flat();
+    const easyQuestions = allQuestions.filter(question => question.complexity === "easy").map(question => question.id);
+    const mediumQuestions = allQuestions.filter(question => question.complexity === "medium").map(question => question.id);
+    const hardQuestions = allQuestions.filter(question => question.complexity === "hard").map(question => question.id);
+    const randomEasyQuestions = getRandomSubarray(easyQuestions, bank.selectedEasyQuestionsCount);
+    const randomMediumQuestions = getRandomSubarray(mediumQuestions, bank.selectedMediumQuestionsCount);
+    const randomHardQuestions = getRandomSubarray(hardQuestions, bank.selectedHardQuestionsCount);
+    return [...randomEasyQuestions, ...randomMediumQuestions, ...randomHardQuestions];
 });
-exports.getRandomQuestionsTopic = getRandomQuestionsTopic;
-const getRandomQuestionsSubjectId = ({ subjectId, numberOfQuestions, excludedTopics }) => __awaiter(void 0, void 0, void 0, function* () {
-    if (numberOfQuestions < 1)
-        return [];
-    const { topics } = yield db_1.subjectDb.getTopics(subjectId);
-    const filteredTopics = topics.filter(topic => !excludedTopics.includes(topic.id));
-    const questionIds = filteredTopics.flatMap(topic => topic.questions.map(question => question.id));
-    if (questionIds.length < numberOfQuestions) {
-        console.log(`insufficient questions in the database. question in data base: ${questionIds.length}, questionsNeeded: ${numberOfQuestions}`);
-        return;
-    }
-    const randomQuestionIds = questionIds.sort(() => 0.5 - Math.random()).slice(0, numberOfQuestions);
-    // const randomQuestions = await questionDb.getManyQuestions(randomQuestionIds);
-    // const examQuestions = randomQuestions.map(randomQuestion => createQuestionData(randomQuestion));
-    return randomQuestionIds;
-});
-exports.getRandomQuestionsSubjectId = getRandomQuestionsSubjectId;
-const getRandomQuestionsSubject = (subject) => __awaiter(void 0, void 0, void 0, function* () {
-    let totalQuestions = subject.numberOfQuestions;
-    subject.questionIds = [];
-    yield Promise.all(subject.topics.map((topic) => __awaiter(void 0, void 0, void 0, function* () {
-        const questions = yield (0, exports.getRandomQuestionsTopic)(topic);
-        subject.questionIds = [...subject.questionIds, ...questions];
-        totalQuestions -= topic.numberOfQuestions;
-    })));
-    const excludedTopics = subject.topics.map(topic => topic.topicId);
-    const remainingQuestions = yield (0, exports.getRandomQuestionsSubjectId)({ subjectId: subject.subjectId, excludedTopics, numberOfQuestions: totalQuestions });
-    subject.questionIds = [...subject.questionIds, ...remainingQuestions];
-    return subject;
-});
-exports.getRandomQuestionsSubject = getRandomQuestionsSubject;
-const createExamSubjects = (subjects) => __awaiter(void 0, void 0, void 0, function* () {
-    let ids = [];
-    yield Promise.all(subjects.map((subject) => __awaiter(void 0, void 0, void 0, function* () {
-        const data = yield db_1.examSubjectDb.createExamSubject(subject);
-        ids = [...ids, data.id];
-    })));
-    return ids;
-});
-exports.createExamSubjects = createExamSubjects;
+exports.getQuestionsFromBank = getQuestionsFromBank;
 //# sourceMappingURL=examHandler.js.map

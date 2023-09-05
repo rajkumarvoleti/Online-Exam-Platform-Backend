@@ -37,7 +37,11 @@ export default function makeTopicDb({ makeDb }: { makeDb: () => IDatabase }) {
         subjectId: true,
         _count: {
           select: {
-            questions: true,
+            questions: {
+              where: {
+                isActive: true,
+              }
+            },
           }
         }
       }
@@ -77,6 +81,9 @@ export default function makeTopicDb({ makeDb }: { makeDb: () => IDatabase }) {
       },
       select: {
         questions: {
+          where: {
+            isActive: true,
+          },
           select: {
             id: true,
           }

@@ -47,71 +47,54 @@ model User {
 }
 
 model Exam {
-  id                    Int           @id @default(autoincrement())
-  name                  String        @db.VarChar(256)
-  description           String        @db.VarChar(128)
-  testAvailabilityStart DateTime      @default(now())
-  testAvailabilityEnd   DateTime      @default(now())
-  totalTime             Int
-  totalMarks            Int
-  totalQuestions        Int
-  subjects              ExamSubject[]
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  createdBy             User          @relation("CreatedExams", fields: [createdById], references: [id])
-  createdById           Int
-  updatedBy             User?         @relation("UpdatedExams", fields: [updatedById], references: [id])
-  updatedById           Int?
+  id             Int        @id @default(autoincrement())
+  name           String     @db.VarChar(256)
+  description    String     @db.VarChar(128)
+  testStartDate  String     @default("undefined")
+  testEndDate    String     @default("undefined")
+  testStartTime  String     @default("undefined")
+  testEndTime    String     @default("undefined")
+  price          Int
+  testDuration   Int
+  totalMarks     Int
+  totalQuestions Int
+  passPercentage Int
+  negativeMarks  Int
+  questions      Question[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  createdBy      User       @relation("CreatedExams", fields: [createdById], references: [id])
+  createdById    Int
+  updatedBy      User?      @relation("UpdatedExams", fields: [updatedById], references: [id])
+  updatedById    Int?
 }
 
 model Subject {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(256)
-  description String        @db.VarChar(128)
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(256)
+  description String   @db.VarChar(128)
   topics      Topic[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  createdBy   User          @relation("CreatedSubjects", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation("CreatedSubjects", fields: [createdById], references: [id])
   createdById Int
-  updatedBy   User?         @relation("UpdatedSubjects", fields: [updatedById], references: [id])
+  updatedBy   User?    @relation("UpdatedSubjects", fields: [updatedById], references: [id])
   updatedById Int?
-  ExamSubject ExamSubject[]
-}
-
-model ExamTopic {
-  id                Int          @id @default(autoincrement())
-  topic             Topic        @relation(fields: [topicId], references: [id])
-  topicId           Int
-  numberOfQuestions Int
-  ExamSubject       ExamSubject? @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
-  examSubjectId     Int?
-}
-
-model ExamSubject {
-  id                Int         @id @default(autoincrement())
-  subject           Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  topics            ExamTopic[]
-  numberOfQuestions Int
-  examId            Int?
-  subjectId         Int
-  Exam              Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
-  questions         Question[]
 }
 
 model Topic {
-  id          Int         @id @default(autoincrement())
-  name        String      @db.VarChar(256)
-  description String      @db.VarChar(128)
-  subject     Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(256)
+  description String     @db.VarChar(128)
+  subject     Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId   Int
   questions   Question[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  createdBy   User        @relation("CreatedTopics", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   User       @relation("CreatedTopics", fields: [createdById], references: [id], onDelete: Cascade)
   createdById Int
-  updatedBy   User?       @relation("UpdatedTopics", fields: [updatedById], references: [id], onDelete: Cascade)
+  updatedBy   User?      @relation("UpdatedTopics", fields: [updatedById], references: [id], onDelete: Cascade)
   updatedById Int?
-  ExamTopic   ExamTopic[]
 }
 
 model Question {
@@ -125,15 +108,15 @@ model Question {
   options           Option[]
   answer            String             @default("") @db.VarChar(255)
   answerExplanation String             @db.VarChar(255)
+  isActive          Boolean            @default(true)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   createdBy         User               @relation("CreatedQuestions", fields: [createdById], references: [id], onDelete: Cascade)
   createdById       Int
   updatedBy         User?              @relation("UpdatedQuestions", fields: [updatedById], references: [id], onDelete: Cascade)
   updatedById       Int?
-  examTopicId       Int?
-  ExamSubject       ExamSubject?       @relation(fields: [examSubjectId], references: [id])
-  examSubjectId     Int?
+  Exam              Exam?              @relation(fields: [examId], references: [id])
+  examId            Int?
 }
 
 model Option {

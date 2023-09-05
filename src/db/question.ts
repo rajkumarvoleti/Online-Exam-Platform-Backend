@@ -78,6 +78,7 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     const questions = await db.question.findMany({
       where: {
         topicId,
+        isActive: true,
       },
       select: {
         answer: true,
@@ -87,6 +88,7 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
         id: true,
         type: true,
         topicId: true,
+        isActive: true,
         options: {
           select:{
             description: true,
@@ -95,7 +97,7 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
         },
       }
     });
-    return questions;
+    return questions.filter(question => question.isActive);
   }
 
   async function getManyQuestions(ids:number[]) {
@@ -103,6 +105,7 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     const questions = await db.question.findMany({
       where: {
         id:{in: ids},
+        isActive: true,
       },
       select: {
         answer: true,
@@ -128,6 +131,7 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     const questions = await db.question.findUnique({
       where: {
         id,
+        isActive: true,
       },
       select: {
         answer: true,
@@ -166,6 +170,8 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
       }
     })
 
+    console.log(question);
+
     if(question.type === "multipleChoice" || question.type === "trueOrFalse")
       return question.options.find(opt => opt.isAnswer).description;
 
@@ -175,6 +181,9 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
   async function getAllQuestions() {
     const db = makeDb();
     const questions = await db.question.findMany({
+      where: {
+        isActive: true,
+      },
       select: {
         id: true,
         description: true,
@@ -224,9 +233,35 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     return question;
   }
 
+  async function isQuestionPresentInAnyExam(questionId:number) {
+    const db = makeDb();
+    const examCount = await db.exam.count({
+      where: {
+        questions: {
+          some: {
+            id: questionId,
+          },
+        },
+      },
+    });
+
+    return examCount > 0;
+  }
+
   async function deleteQuestion(id: number) {
     const db = makeDb();
-    const question = await db.question.delete({
+    const isPresent = await isQuestionPresentInAnyExam(id);
+    let question;
+    if(isPresent){
+      question = await db.question.update({
+        where: {id},
+        data: {
+          isActive: false,
+        }
+      })
+      return question;
+    }
+    question = await db.question.delete({
       where: {
         id
       }
@@ -244,13 +279,11 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
         topicId: true,
       }
     })
-    const questions = await db.question.deleteMany({
-      where: {
-        id : {
-          in: ids
-        }
-      },
-    })
+
+    await Promise.all(ids.map(async(id) => {
+      await deleteQuestion(id);
+    }))
+
     return data.topicId;
   }
 

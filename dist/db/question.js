@@ -86,6 +86,7 @@ function makeQuestionDb({ makeDb }) {
             const questions = yield db.question.findMany({
                 where: {
                     topicId,
+                    isActive: true,
                 },
                 select: {
                     answer: true,
@@ -95,6 +96,7 @@ function makeQuestionDb({ makeDb }) {
                     id: true,
                     type: true,
                     topicId: true,
+                    isActive: true,
                     options: {
                         select: {
                             description: true,
@@ -103,7 +105,7 @@ function makeQuestionDb({ makeDb }) {
                     },
                 }
             });
-            return questions;
+            return questions.filter(question => question.isActive);
         });
     }
     function getManyQuestions(ids) {
@@ -112,6 +114,7 @@ function makeQuestionDb({ makeDb }) {
             const questions = yield db.question.findMany({
                 where: {
                     id: { in: ids },
+                    isActive: true,
                 },
                 select: {
                     answer: true,
@@ -138,6 +141,7 @@ function makeQuestionDb({ makeDb }) {
             const questions = yield db.question.findUnique({
                 where: {
                     id,
+                    isActive: true,
                 },
                 select: {
                     answer: true,
@@ -176,6 +180,7 @@ function makeQuestionDb({ makeDb }) {
                     }
                 }
             });
+            console.log(question);
             if (question.type === "multipleChoice" || question.type === "trueOrFalse")
                 return question.options.find(opt => opt.isAnswer).description;
             return question.answer;
@@ -185,6 +190,9 @@ function makeQuestionDb({ makeDb }) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = makeDb();
             const questions = yield db.question.findMany({
+                where: {
+                    isActive: true,
+                },
                 select: {
                     id: true,
                     description: true,
@@ -234,10 +242,36 @@ function makeQuestionDb({ makeDb }) {
             return question;
         });
     }
+    function isQuestionPresentInAnyExam(questionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const examCount = yield db.exam.count({
+                where: {
+                    questions: {
+                        some: {
+                            id: questionId,
+                        },
+                    },
+                },
+            });
+            return examCount > 0;
+        });
+    }
     function deleteQuestion(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = makeDb();
-            const question = yield db.question.delete({
+            const isPresent = yield isQuestionPresentInAnyExam(id);
+            let question;
+            if (isPresent) {
+                question = yield db.question.update({
+                    where: { id },
+                    data: {
+                        isActive: false,
+                    }
+                });
+                return question;
+            }
+            question = yield db.question.delete({
                 where: {
                     id
                 }
@@ -256,13 +290,9 @@ function makeQuestionDb({ makeDb }) {
                     topicId: true,
                 }
             });
-            const questions = yield db.question.deleteMany({
-                where: {
-                    id: {
-                        in: ids
-                    }
-                },
-            });
+            yield Promise.all(ids.map((id) => __awaiter(this, void 0, void 0, function* () {
+                yield deleteQuestion(id);
+            })));
             return data.topicId;
         });
     }

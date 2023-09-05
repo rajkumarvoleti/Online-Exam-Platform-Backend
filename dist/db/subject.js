@@ -101,9 +101,13 @@ function makeSubjectDb({ makeDb }) {
                         select: {
                             id: true,
                             questions: {
+                                where: {
+                                    isActive: true,
+                                },
                                 select: {
-                                    id: true
-                                }
+                                    id: true,
+                                    complexity: true,
+                                },
                             }
                         }
                     }
@@ -123,6 +127,9 @@ function makeSubjectDb({ makeDb }) {
                     topics: {
                         select: {
                             questions: {
+                                where: {
+                                    isActive: true,
+                                },
                                 select: {
                                     complexity: true,
                                 }

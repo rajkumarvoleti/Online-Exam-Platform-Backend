@@ -5,7 +5,6 @@ import makeSubjectDb from './subject';
 import makeTopicDb from './topic';
 import makeQuestionDb from './question';
 import makeExamDb from './exam';
-import makeExamSubjectDb from './examSubject';
 
 const db = new PrismaClient();
 
@@ -18,4 +17,3 @@ export const subjectDb = makeSubjectDb({ makeDb });
 export const topicDb = makeTopicDb({ makeDb });
 export const questionDb = makeQuestionDb({ makeDb });
 export const examDb = makeExamDb({ makeDb });
-export const examSubjectDb = makeExamSubjectDb({ makeDb });

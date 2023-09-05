@@ -10,32 +10,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getResult = exports.getExam = exports.deleteAllExams = exports.getAllExams = exports.createExam = void 0;
-const examHandler_1 = require("../handlers/examHandler");
 const db_1 = require("../db");
+const examHandler_1 = require("../handlers/examHandler");
 const createExam = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    const { testData } = req.body;
-    console.log(testData);
-    let examSubjects = [];
-    yield Promise.all(testData.subjects.map((subject, i) => __awaiter(void 0, void 0, void 0, function* () {
-        const updatedSubject = yield (0, examHandler_1.getRandomQuestionsSubject)(subject);
-        examSubjects = [...examSubjects, updatedSubject];
+    const testData = req.body.testData;
+    const userId = req.body.userId;
+    let questionIds = [];
+    yield Promise.all(testData.testDetails.questionBanks.map((bank) => __awaiter(void 0, void 0, void 0, function* () {
+        const newQuestionIds = yield (0, examHandler_1.getQuestionsFromBank)(bank);
+        questionIds = [...questionIds, ...newQuestionIds];
     })));
-    console.log("hello");
-    const examSubjectIds = yield (0, examHandler_1.createExamSubjects)(examSubjects);
-    const examDetails = {
-        description: testData.description,
-        name: testData.name,
-        subjectIds: examSubjectIds,
-        testAvailabilityStart: new Date(),
-        testAvailabilityEnd: new Date(),
-        totalMarks: testData.totalMarks,
-        totalQuestions: testData.totalQuestions,
-        totalTime: testData.totalTime,
-        userId: testData.userId,
-    };
-    const exam = yield db_1.examDb.createExam(examDetails);
+    const exam = yield db_1.examDb.createExam({ userId, data: testData, questions: questionIds });
     return {
-        statusCode: 201,
+        statusCode: 200,
         headers: {
             "Content-Type": "application/json",
         },
@@ -80,9 +67,10 @@ exports.getExam = getExam;
 const getResult = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.query.data;
     let score = 0;
-    yield Promise.all(data.map(({ id, response }) => __awaiter(void 0, void 0, void 0, function* () {
+    const responses = Object.values(data);
+    console.log(responses);
+    yield Promise.all(responses.map(({ id, response }) => __awaiter(void 0, void 0, void 0, function* () {
         const answer = yield db_1.questionDb.getAnswer(parseInt(id, 10));
-        console.log({ answer, response });
         if (answer === response)
             score = score + 1;
     })));

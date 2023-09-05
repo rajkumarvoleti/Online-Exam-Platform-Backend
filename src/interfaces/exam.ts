@@ -45,30 +45,64 @@ export interface IQuestionAndAnswer {
   question: string,
   answer: IAnswer,
 }
-
-export interface IExamTopic {
-  topicId: number,
-  numberOfQuestions: number,
-
-}
-
-export interface IExamSubject {
-  subjectId: number,
-  topics: IExamTopic[],
-  numberOfQuestions: number,
-  // questions?: IQuestionAndAnswer[],
-  questionIds?: number[],
-}
-
-export interface IExam {
-  id?: number,
+export interface IQuestionBank {
+  id: number,
   name: string,
-  description: string,
-  testAvailabilityStart: Date,
-  testAvailabilityEnd: Date,
-  totalTime: number,
-  totalMarks: number,
   totalQuestions: number,
-  subjectIds: number[],
-  userId:number,
+  easyQuestionsCount: number,
+  mediumQuestionsCount: number,
+  hardQuestionsCount: number,
+}
+
+export interface ISelectedQuestionBank extends IQuestionBank {
+  selectedTotalQuestions: number
+  selectedEasyQuestionsCount: number
+  selectedMediumQuestionsCount: number
+  selectedHardQuestionsCount: number
+}
+export interface ITestDetailsForm {
+  testName: string
+  testDescription: string
+  totalQuestions: number
+  questionBanks: ISelectedQuestionBank[],
+}
+
+export interface ITestEvaluationForm {
+  totalQuestions: number,
+  totalMarks: number,
+  passPercentage: number,
+  negativeMarks: number,
+}
+
+export interface ITestSettingsForm extends ITestEvaluationForm {
+  testDateAvailability: "specific" | "always",
+  testTimeAvailability: "specific" | "always",
+  testDurationAvailability: "specific" | "always",
+  testStartDate: string,
+  testEndDate:string,
+  testStartTime: string,
+  testEndTime: string,
+  testDuration: number,
+  resultFormat: string,
+  testDeclaration: string,
+}
+
+export interface IPromoCode {
+  id: number,
+  code: string,
+  offer: number
+}
+
+export type IPricingType = "private" | "open"
+
+export interface ITestPricingForm {
+  testType: IPricingType,
+  price: number,
+  promoCodes: IPromoCode[]
+}
+
+export interface ICreateTestData {
+  testDetails:ITestDetailsForm,
+  testSettings:ITestSettingsForm,
+  pricing:ITestPricingForm,
 }

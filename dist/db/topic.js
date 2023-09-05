@@ -46,7 +46,11 @@ function makeTopicDb({ makeDb }) {
                     subjectId: true,
                     _count: {
                         select: {
-                            questions: true,
+                            questions: {
+                                where: {
+                                    isActive: true,
+                                }
+                            },
                         }
                     }
                 }
@@ -89,6 +93,9 @@ function makeTopicDb({ makeDb }) {
                 },
                 select: {
                     questions: {
+                        where: {
+                            isActive: true,
+                        },
                         select: {
                             id: true,
                         }
