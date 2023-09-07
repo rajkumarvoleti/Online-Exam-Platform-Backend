@@ -106,3 +106,19 @@ export interface ICreateTestData {
   testSettings:ITestSettingsForm,
   pricing:ITestPricingForm,
 }
+
+export interface ICreateTopic {
+  id: number,
+  name: string,
+  description: string,
+}
+
+export interface ICreateSubjectTopic {
+  name: string,
+  description: string,
+  topics: ICreateTopic[],
+}
+
+export interface IEditSubjectTopic extends ICreateSubjectTopic {
+  id: number,
+}

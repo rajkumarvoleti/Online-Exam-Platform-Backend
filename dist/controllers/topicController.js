@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTopic = exports.updateTopic = exports.getTopics = exports.createTopic = void 0;
+exports.deleteTopic = exports.updateTopic = exports.getTopic = exports.getTopics = exports.createTopic = void 0;
 const db_1 = require("../db");
 const createTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
@@ -49,6 +49,25 @@ const getTopics = (req) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 exports.getTopics = getTopics;
+const getTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const { topicId } = req.query;
+    const data = yield db_1.topicDb.getTopic(parseInt(topicId, 10));
+    const topic = {
+        description: data.description,
+        name: data.name,
+        subjectId: data.subjectId,
+        id: data.id,
+        questionsCount: data._count.questions
+    };
+    return {
+        statusCode: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: { topic }
+    };
+});
+exports.getTopic = getTopic;
 const updateTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const { topicData, id } = req.body;
     const topic = db_1.topicDb.editTopic({ topicData, id });
@@ -70,6 +89,16 @@ const deleteTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
                 'Content-Type': 'application/json',
             },
             body: { msg: "Invalid request. Id is not present" }
+        };
+    }
+    const questions = yield db_1.topicDb.getQuestions(id);
+    if (questions.questions.length !== 0) {
+        return {
+            statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: { msg: "Cannot delete the topic. Please delete the questions in the topic first" }
         };
     }
     const topic = yield db_1.topicDb.deleteTopic(id);

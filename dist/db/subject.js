@@ -27,6 +27,30 @@ function makeSubjectDb({ makeDb }) {
             return subject;
         });
     }
+    function createSubjectAndTopics({ data, userId }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const subjects = yield db.subject.create({
+                data: {
+                    name: data.name,
+                    description: data.description,
+                    createdBy: {
+                        connect: { id: userId }
+                    },
+                    topics: {
+                        createMany: {
+                            data: data.topics.map(topic => ({
+                                createdById: userId,
+                                name: topic.name,
+                                description: topic.description
+                            }))
+                        }
+                    }
+                }
+            });
+            return subjects;
+        });
+    }
     function getAllSubjects() {
         return __awaiter(this, void 0, void 0, function* () {
             const db = makeDb();
@@ -40,6 +64,9 @@ function makeSubjectDb({ makeDb }) {
                             topics: true,
                         }
                     }
+                },
+                orderBy: {
+                    updatedAt: "desc",
                 }
             });
             return subjects;
@@ -109,6 +136,9 @@ function makeSubjectDb({ makeDb }) {
                                     complexity: true,
                                 },
                             }
+                        },
+                        orderBy: {
+                            updatedAt: "desc",
                         }
                     }
                 }
@@ -134,6 +164,9 @@ function makeSubjectDb({ makeDb }) {
                                     complexity: true,
                                 }
                             }
+                        },
+                        orderBy: {
+                            updatedAt: "desc"
                         }
                     }
                 }
@@ -141,7 +174,7 @@ function makeSubjectDb({ makeDb }) {
             return questionBanks;
         });
     }
-    return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject, getAllQuestionBanks };
+    return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject, getAllQuestionBanks, createSubjectAndTopics };
 }
 exports.default = makeSubjectDb;
 //# sourceMappingURL=subject.js.map

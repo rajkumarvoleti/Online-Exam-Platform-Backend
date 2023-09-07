@@ -49,13 +49,42 @@ function makeTopicDb({ makeDb }) {
                             questions: {
                                 where: {
                                     isActive: true,
-                                }
+                                },
+                            },
+                        }
+                    }
+                },
+                orderBy: {
+                    updatedAt: "desc",
+                }
+            });
+            return topics;
+        });
+    }
+    function getTopic(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const topic = yield db.topic.findUnique({
+                where: {
+                    id
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    subjectId: true,
+                    _count: {
+                        select: {
+                            questions: {
+                                where: {
+                                    isActive: true,
+                                },
                             },
                         }
                     }
                 }
             });
-            return topics;
+            return topic;
         });
     }
     function editTopic({ topicData, id }) {
@@ -98,14 +127,17 @@ function makeTopicDb({ makeDb }) {
                         },
                         select: {
                             id: true,
+                        },
+                        orderBy: {
+                            updatedAt: "desc",
                         }
-                    }
-                }
+                    },
+                },
             });
             return questions;
         });
     }
-    return { createTopic, getTopics, deleteTopic, editTopic, getQuestions };
+    return { createTopic, getTopics, deleteTopic, editTopic, getQuestions, getTopic };
 }
 exports.default = makeTopicDb;
 //# sourceMappingURL=topic.js.map

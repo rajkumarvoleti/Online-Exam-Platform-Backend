@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSubject = exports.updateSubject = exports.getSubject = exports.getAllQuestionBanks = exports.getAllSubjects = exports.createSubject = void 0;
+exports.deleteSubject = exports.updateSubject = exports.getSubject = exports.getAllQuestionBanks = exports.getAllSubjects = exports.createSubjectAndTopics = exports.createSubject = void 0;
 const db_1 = require("../db");
 const createSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
@@ -29,6 +29,18 @@ const createSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 exports.createSubject = createSubject;
+const createSubjectAndTopics = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = req.body;
+    const subjectAndTopics = yield db_1.subjectDb.createSubjectAndTopics({ data: data.subjectTopicsData, userId: data.userId });
+    return {
+        statusCode: 201,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: { subjectAndTopics }
+    };
+});
+exports.createSubjectAndTopics = createSubjectAndTopics;
 const getAllSubjects = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield db_1.subjectDb.getAllSubjects();
     const subjects = data.map(subject => {
@@ -110,7 +122,17 @@ const deleteSubject = (req) => __awaiter(void 0, void 0, void 0, function* () {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: { msg: "Invalid request. Id is not present" }
+            body: { error: "Invalid request. Id is not present" }
+        };
+    }
+    const topics = yield db_1.subjectDb.getTopics(id);
+    if (topics.topics.length !== 0) {
+        return {
+            statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: { error: "Cannot delete the subject. Please delete the chapters in it first" }
         };
     }
     yield db_1.subjectDb.deleteSubject(id);

@@ -40,13 +40,41 @@ export default function makeTopicDb({ makeDb }: { makeDb: () => IDatabase }) {
             questions: {
               where: {
                 isActive: true,
-              }
+              },
+            },
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: "desc",
+      }
+    });
+    return topics;
+  }
+
+  async function getTopic(id: number) {
+    const db = makeDb();
+    const topic = await db.topic.findUnique({
+      where: {
+        id
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        subjectId: true,
+        _count: {
+          select: {
+            questions: {
+              where: {
+                isActive: true,
+              },
             },
           }
         }
       }
     });
-    return topics;
+    return topic;
   }
 
   async function editTopic({ topicData, id }: { topicData: ITopic, id: number }) {
@@ -86,12 +114,15 @@ export default function makeTopicDb({ makeDb }: { makeDb: () => IDatabase }) {
           },
           select: {
             id: true,
+          },
+          orderBy: {
+            updatedAt: "desc",
           }
-        }
-      }
+        },
+      },
     })
     return questions;
   }
 
-  return { createTopic, getTopics, deleteTopic, editTopic, getQuestions };
+  return { createTopic, getTopics, deleteTopic, editTopic, getQuestions, getTopic };
 }

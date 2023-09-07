@@ -42,6 +42,25 @@ export const getTopics = async (req: IHttpRequest) => {
   }
 }
 
+export const getTopic = async (req: IHttpRequest) => {
+  const { topicId } = req.query;
+  const data = await topicDb.getTopic(parseInt(topicId,10));
+  const topic:ITopic = {
+    description: data.description,
+    name: data.name,
+    subjectId: data.subjectId,
+    id: data.id,
+    questionsCount: data._count.questions
+  }
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: { topic }
+  }
+}
+
 export const updateTopic = async (req: IHttpRequest) => {
   const { topicData, id } = req.body;
   const topic = topicDb.editTopic({ topicData, id });
@@ -65,6 +84,18 @@ export const deleteTopic = async (req: IHttpRequest) => {
       body: { msg: "Invalid request. Id is not present" }
     }
   }
+
+  const questions = await topicDb.getQuestions(id);
+  if(questions.questions.length !== 0){
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: { msg: "Cannot delete the topic. Please delete the questions in the topic first" }
+    }
+  }
+
   const topic = await topicDb.deleteTopic(id);
   return {
     statusCode: 200,

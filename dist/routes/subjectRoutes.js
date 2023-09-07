@@ -8,6 +8,7 @@ const express_callback_1 = __importDefault(require("../util/express-callback"));
 const subjectController_1 = require("../controllers/subjectController");
 const subjectRouter = express_1.default.Router();
 subjectRouter.post("/create", (0, express_callback_1.default)(subjectController_1.createSubject));
+subjectRouter.post("/create2", (0, express_callback_1.default)(subjectController_1.createSubjectAndTopics));
 subjectRouter.post("/update", (0, express_callback_1.default)(subjectController_1.updateSubject));
 subjectRouter.get("/getAll", (0, express_callback_1.default)(subjectController_1.getAllSubjects));
 subjectRouter.get("/get", (0, express_callback_1.default)(subjectController_1.getSubject));

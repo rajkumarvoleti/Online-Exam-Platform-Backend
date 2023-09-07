@@ -55,7 +55,7 @@ const updateQuestion = (req) => __awaiter(void 0, void 0, void 0, function* () {
         complexity: data.questionData.complexity,
         topicId: data.questionData.topicId
     };
-    const question = db_1.questionDb.editQuestion({ questionData, userId });
+    const question = yield db_1.questionDb.editQuestion({ questionData, userId });
     return {
         statusCode: 200,
         headers: {

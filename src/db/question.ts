@@ -95,6 +95,9 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
             isAnswer: true,
           }
         },
+      },
+      orderBy: {
+        updatedAt: "desc",
       }
     });
     return questions.filter(question => question.isActive);
@@ -121,6 +124,9 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
             isAnswer: true,
           }
         },
+      },
+      orderBy: {
+        updatedAt: "desc",
       }
     });
     return questions;
@@ -194,6 +200,9 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
             id: true,
           }
         }
+      },
+      orderBy: {
+        updatedAt: "desc",
       }
     })
     return questions;
@@ -229,7 +238,7 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
             }
           }
         },
-    }).catch((e: any) => console.log(e));
+    });
     return question;
   }
 

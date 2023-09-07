@@ -103,6 +103,9 @@ function makeQuestionDb({ makeDb }) {
                             isAnswer: true,
                         }
                     },
+                },
+                orderBy: {
+                    updatedAt: "desc",
                 }
             });
             return questions.filter(question => question.isActive);
@@ -130,6 +133,9 @@ function makeQuestionDb({ makeDb }) {
                             isAnswer: true,
                         }
                     },
+                },
+                orderBy: {
+                    updatedAt: "desc",
                 }
             });
             return questions;
@@ -203,6 +209,9 @@ function makeQuestionDb({ makeDb }) {
                             id: true,
                         }
                     }
+                },
+                orderBy: {
+                    updatedAt: "desc",
                 }
             });
             return questions;
@@ -238,7 +247,7 @@ function makeQuestionDb({ makeDb }) {
                         }
                     }
                 },
-            }).catch((e) => console.log(e));
+            });
             return question;
         });
     }

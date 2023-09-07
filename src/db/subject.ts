@@ -1,5 +1,5 @@
 import { IDatabase } from "../interfaces/db";
-import { ISubject } from "../interfaces/exam";
+import { ICreateSubjectTopic, ISubject } from "../interfaces/exam";
 
 export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
 
@@ -19,6 +19,29 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
     return subject;
   }
 
+  async function createSubjectAndTopics({data, userId}:{data:ICreateSubjectTopic, userId:number}) {
+    const db = makeDb();
+    const subjects = await db.subject.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        createdBy: {
+          connect: {id:userId}
+        },
+        topics: {
+          createMany: {
+            data: data.topics.map(topic => ({
+              createdById: userId,
+              name: topic.name,
+              description: topic.description
+            }))
+          }
+        }
+      }
+    })
+    return subjects;
+  }
+
   async function getAllSubjects() {
     const db = makeDb();
     const subjects = await db.subject.findMany({
@@ -31,6 +54,9 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
             topics: true,
           }
         }
+      },
+      orderBy: {
+        updatedAt: "desc",
       }
     })
     return subjects;
@@ -97,6 +123,9 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
                 complexity: true,
               },
             }
+          },
+          orderBy: {
+            updatedAt: "desc",
           }
         }
       }
@@ -122,6 +151,9 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
                 complexity: true,
               }
             }
+          },
+          orderBy: {
+            updatedAt: "desc"
           }
         }
       }
@@ -129,5 +161,5 @@ export default function makeSubjectDb({ makeDb }: { makeDb: () => IDatabase }) {
     return questionBanks;
   }
 
-  return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject, getAllQuestionBanks };
+  return { createSubject, getAllSubjects, deleteSubject, editSubject, getTopics, getSubject, getAllQuestionBanks, createSubjectAndTopics };
 }

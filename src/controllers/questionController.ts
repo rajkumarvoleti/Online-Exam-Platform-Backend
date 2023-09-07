@@ -49,7 +49,7 @@ export const updateQuestion = async (req: IHttpRequest) => {
     complexity: data.questionData.complexity,
     topicId: data.questionData.topicId
   }
-  const question = questionDb.editQuestion({questionData, userId});
+  const question = await questionDb.editQuestion({questionData, userId});
   return {
     statusCode: 200,
     headers: {

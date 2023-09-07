@@ -22,6 +22,19 @@ export const createSubject = async (req: IHttpRequest) => {
 
 }
 
+export const createSubjectAndTopics = async (req: IHttpRequest) => {
+  const data = req.body;
+  const subjectAndTopics = await subjectDb.createSubjectAndTopics({data:data.subjectTopicsData, userId: data.userId});
+
+  return {
+    statusCode: 201,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: { subjectAndTopics }
+  }
+}
+
 export const getAllSubjects = async (req: IHttpRequest) => {
   const data = await subjectDb.getAllSubjects();
   const subjects:ISubject[] = data.map(subject => {
@@ -105,7 +118,18 @@ export const deleteSubject = async (req: IHttpRequest) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: { msg: "Invalid request. Id is not present" }
+      body: { error: "Invalid request. Id is not present" }
+    }
+  }
+  const topics = await subjectDb.getTopics(id);
+  if(topics.topics.length !== 0)
+  {
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: { error: "Cannot delete the subject. Please delete the chapters in it first" }
     }
   }
   await subjectDb.deleteSubject(id);
