@@ -30,6 +30,9 @@ model User {
   timezone         String?    @db.VarChar(256)
   tagline          String?    @db.VarChar(512)
   bio              String?    @db.VarChar(512)
+  totalExperience  Int?
+  experienceIn     String?    @db.VarChar(512)
+  qualification    String?    @db.VarChar(512)
   createdSubjects  Subject[]  @relation("CreatedSubjects")
   updatedSubjects  Subject[]  @relation("UpdatedSubjects")
   createdTopics    Topic[]    @relation("CreatedTopics")

@@ -41,6 +41,9 @@ export default function makeUserDb({ makeDb }: {makeDb:() => IDatabase}) {
         timezone: user.timezone,
         tagline: user.tagline,
         bio: user.bio,
+        experienceIn: user.experienceIn,
+        qualification: user.qualification,
+        totalExperience: user.totalExperience,
       }
     });
     return updatedUser;

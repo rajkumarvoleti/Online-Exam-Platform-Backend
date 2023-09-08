@@ -10,4 +10,7 @@ export interface IUser {
   timezone?:string
   tagline?:string
   bio?:string
+  totalExperience?:number
+  experienceIn?:string,
+  qualification?:string,
 }
