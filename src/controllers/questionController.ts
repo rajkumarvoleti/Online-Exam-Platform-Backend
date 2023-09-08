@@ -20,7 +20,7 @@ export const createQuestion = async (req: IHttpRequest) => {
 }
 
 export const createQuestions = async (req:IHttpRequest) => {
-  const questionsData = req.body.questionsData;
+  const questionsData:IQuestionAndAnswer[] = req.body.questionsData;
   const userId = req.body.userId;
   questionsData.forEach(async (questionData:IQuestionAndAnswer) => {
     await questionDb.createQuestion({questionData,userId});
@@ -30,7 +30,7 @@ export const createQuestions = async (req:IHttpRequest) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: { msg: "created successfully" }
+    body: { msg: "created successfully", topicId:questionsData[0].topicId }
   }
 }
 

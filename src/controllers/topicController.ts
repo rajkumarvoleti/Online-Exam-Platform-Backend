@@ -1,5 +1,5 @@
-import { topicDb } from "../db";
-import { ITopic } from "../interfaces/exam";
+import { subjectDb, topicDb } from "../db";
+import { ISubject, ITopic } from "../interfaces/exam";
 import { IHttpRequest } from "../interfaces/http";
 
 export const createTopic = async (req: IHttpRequest) => {
@@ -39,6 +39,20 @@ export const getTopics = async (req: IHttpRequest) => {
       'Content-Type': 'application/json',
     },
     body: { topics }
+  }
+}
+
+export const getTopicsFromTopicId = async (req: IHttpRequest) => {
+  const { topicId } = req.query;
+  const subjectId = (await topicDb.getTopic(parseInt(topicId,10))).subjectId;
+  const subject:ISubject = await subjectDb.getSubject(subjectId);
+  const topics:ITopic[] = await topicDb.getTopics({subjectId});
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: { topics, subject }
   }
 }
 
