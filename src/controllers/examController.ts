@@ -63,9 +63,9 @@ export const getResult = async (req:IHttpRequest) => {
   const data = req.query.data;
   let score = 0;
   const responses = Object.values(data)
-  console.log(responses);
   await Promise.all(responses.map(async ({id, response}:{id:string, response:string}) => {
     const answer = await questionDb.getAnswer(parseInt(id,10));
+    console.log({answer,response});
     if(answer === response)
       score = score + 1;
   }));
