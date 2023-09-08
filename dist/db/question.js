@@ -186,9 +186,9 @@ function makeQuestionDb({ makeDb }) {
                     }
                 }
             });
-            console.log(question);
-            if (question.type === "multipleChoice" || question.type === "trueOrFalse")
+            if (question.type === "multipleChoice")
                 return question.options.find(opt => opt.isAnswer).description;
+            console.log({ question });
             return question.answer;
         });
     }

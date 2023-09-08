@@ -68,9 +68,9 @@ const getResult = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.query.data;
     let score = 0;
     const responses = Object.values(data);
-    console.log(responses);
     yield Promise.all(responses.map(({ id, response }) => __awaiter(void 0, void 0, void 0, function* () {
         const answer = yield db_1.questionDb.getAnswer(parseInt(id, 10));
+        console.log({ answer, response });
         if (answer === response)
             score = score + 1;
     })));

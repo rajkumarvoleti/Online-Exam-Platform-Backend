@@ -11,6 +11,7 @@ topicRouter.post("/create", (0, express_callback_1.default)(topicController_1.cr
 topicRouter.post("/update", (0, express_callback_1.default)(topicController_1.updateTopic));
 topicRouter.get("/getAll", (0, express_callback_1.default)(topicController_1.getTopics));
 topicRouter.get("/get", (0, express_callback_1.default)(topicController_1.getTopic));
+topicRouter.get("/getTopicsFromTopicId", (0, express_callback_1.default)(topicController_1.getTopicsFromTopicId));
 topicRouter.delete("/delete", (0, express_callback_1.default)(topicController_1.deleteTopic));
 exports.default = topicRouter;
 //# sourceMappingURL=topicRoutes.js.map

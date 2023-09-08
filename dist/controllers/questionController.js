@@ -36,7 +36,7 @@ const createQuestions = (req) => __awaiter(void 0, void 0, void 0, function* () 
         headers: {
             'Content-Type': 'application/json',
         },
-        body: { msg: "created successfully" }
+        body: { msg: "created successfully", topicId: questionsData[0].topicId }
     };
 });
 exports.createQuestions = createQuestions;

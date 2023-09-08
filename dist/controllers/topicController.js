@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTopic = exports.updateTopic = exports.getTopic = exports.getTopics = exports.createTopic = void 0;
+exports.deleteTopic = exports.updateTopic = exports.getTopic = exports.getTopicsFromTopicId = exports.getTopics = exports.createTopic = void 0;
 const db_1 = require("../db");
 const createTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
@@ -49,6 +49,20 @@ const getTopics = (req) => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 exports.getTopics = getTopics;
+const getTopicsFromTopicId = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const { topicId } = req.query;
+    const subjectId = (yield db_1.topicDb.getTopic(parseInt(topicId, 10))).subjectId;
+    const subject = yield db_1.subjectDb.getSubject(subjectId);
+    const topics = yield db_1.topicDb.getTopics({ subjectId });
+    return {
+        statusCode: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: { topics, subject }
+    };
+});
+exports.getTopicsFromTopicId = getTopicsFromTopicId;
 const getTopic = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const { topicId } = req.query;
     const data = yield db_1.topicDb.getTopic(parseInt(topicId, 10));
