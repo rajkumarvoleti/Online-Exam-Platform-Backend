@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getQuestionsFromBank = void 0;
+exports.getTopic = exports.getQuestionsCount = exports.getQuestionsFromTopic = void 0;
 const db_1 = require("../db");
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -21,16 +21,39 @@ function getRandomSubarray(array, size) {
     shuffleArray(array);
     return array.slice(0, size);
 }
-const getQuestionsFromBank = (bank) => __awaiter(void 0, void 0, void 0, function* () {
-    const topics = yield db_1.subjectDb.getTopics(bank.id);
-    const allQuestions = topics.topics.map(topic => topic.questions).flat();
-    const easyQuestions = allQuestions.filter(question => question.complexity === "easy").map(question => question.id);
-    const mediumQuestions = allQuestions.filter(question => question.complexity === "medium").map(question => question.id);
-    const hardQuestions = allQuestions.filter(question => question.complexity === "hard").map(question => question.id);
-    const randomEasyQuestions = getRandomSubarray(easyQuestions, bank.selectedEasyQuestionsCount);
-    const randomMediumQuestions = getRandomSubarray(mediumQuestions, bank.selectedMediumQuestionsCount);
-    const randomHardQuestions = getRandomSubarray(hardQuestions, bank.selectedHardQuestionsCount);
+const getQuestionsFromTopic = (topic) => __awaiter(void 0, void 0, void 0, function* () {
+    const questions = yield db_1.questionDb.getQuestionsWithComplexity(topic.id);
+    const easyQuestions = questions.filter(question => question.complexity === "easy").map(question => question.id);
+    const mediumQuestions = questions.filter(question => question.complexity === "medium").map(question => question.id);
+    const hardQuestions = questions.filter(question => question.complexity === "hard").map(question => question.id);
+    const randomEasyQuestions = getRandomSubarray(easyQuestions, topic.selectedEasyQuestionsCount);
+    const randomMediumQuestions = getRandomSubarray(mediumQuestions, topic.selectedMediumQuestionsCount);
+    const randomHardQuestions = getRandomSubarray(hardQuestions, topic.selectedHardQuestionsCount);
     return [...randomEasyQuestions, ...randomMediumQuestions, ...randomHardQuestions];
 });
-exports.getQuestionsFromBank = getQuestionsFromBank;
+exports.getQuestionsFromTopic = getQuestionsFromTopic;
+const getQuestionsCount = (topicId) => __awaiter(void 0, void 0, void 0, function* () {
+    const questions = yield db_1.questionDb.getQuestionsWithComplexity(topicId);
+    const easyQuestionsCount = questions.filter(question => question.complexity === "easy").length;
+    const mediumQuestionsCount = questions.filter(question => question.complexity === "medium").length;
+    const hardQuestionsCount = questions.filter(question => question.complexity === "hard").length;
+    return { easyQuestionsCount, mediumQuestionsCount, hardQuestionsCount };
+});
+exports.getQuestionsCount = getQuestionsCount;
+const getTopic = ({ id, name }) => __awaiter(void 0, void 0, void 0, function* () {
+    const { easyQuestionsCount, hardQuestionsCount, mediumQuestionsCount } = yield (0, exports.getQuestionsCount)(id);
+    return {
+        easyQuestionsCount,
+        hardQuestionsCount,
+        mediumQuestionsCount,
+        id,
+        name,
+        selectedEasyQuestionsCount: 0,
+        selectedHardQuestionsCount: 0,
+        selectedMediumQuestionsCount: 0,
+        selectedTotalQuestions: 0,
+        totalQuestions: easyQuestionsCount + mediumQuestionsCount + hardQuestionsCount
+    };
+});
+exports.getTopic = getTopic;
 //# sourceMappingURL=examHandler.js.map

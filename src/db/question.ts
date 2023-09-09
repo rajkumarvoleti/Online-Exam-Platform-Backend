@@ -296,5 +296,21 @@ export default function makeQuestionDb({ makeDb }: { makeDb: () => IDatabase }) 
     return data.topicId;
   }
 
-  return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions,getManyQuestions, deleteQuestions, getAnswer };
+  async function getQuestionsWithComplexity(topicId:number) {
+    const db = makeDb();
+    const questions = await db.question.findMany({
+      where: {
+        topicId,
+        isActive: true,
+      },
+      select: {
+        complexity: true,
+        id: true,
+      }
+    })
+
+    return questions;
+  }
+
+  return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions,getManyQuestions, deleteQuestions, getAnswer, getQuestionsWithComplexity };
 }

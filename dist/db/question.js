@@ -305,7 +305,23 @@ function makeQuestionDb({ makeDb }) {
             return data.topicId;
         });
     }
-    return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions, getManyQuestions, deleteQuestions, getAnswer };
+    function getQuestionsWithComplexity(topicId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = makeDb();
+            const questions = yield db.question.findMany({
+                where: {
+                    topicId,
+                    isActive: true,
+                },
+                select: {
+                    complexity: true,
+                    id: true,
+                }
+            });
+            return questions;
+        });
+    }
+    return { createQuestion, getAllQuestions, deleteQuestion, editQuestion, getQuestions, getQuestion, createManyQuestions, getManyQuestions, deleteQuestions, getAnswer, getQuestionsWithComplexity };
 }
 exports.default = makeQuestionDb;
 //# sourceMappingURL=question.js.map

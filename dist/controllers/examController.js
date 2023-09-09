@@ -16,8 +16,9 @@ const createExam = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const testData = req.body.testData;
     const userId = req.body.userId;
     let questionIds = [];
-    yield Promise.all(testData.testDetails.questionBanks.map((bank) => __awaiter(void 0, void 0, void 0, function* () {
-        const newQuestionIds = yield (0, examHandler_1.getQuestionsFromBank)(bank);
+    const topics = testData.testDetails.questionBankTopics;
+    yield Promise.all(topics.map((topic) => __awaiter(void 0, void 0, void 0, function* () {
+        const newQuestionIds = yield (0, examHandler_1.getQuestionsFromTopic)(topic);
         questionIds = [...questionIds, ...newQuestionIds];
     })));
     const exam = yield db_1.examDb.createExam({ userId, data: testData, questions: questionIds });

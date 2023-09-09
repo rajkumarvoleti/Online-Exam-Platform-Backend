@@ -12,15 +12,6 @@ export interface ISubject {
   description: string,
   topicsCount?: number,
 }
-export interface IQuestionBank {
-  id: number,
-  name: string,
-  totalQuestions: number,
-  easyQuestionsCount: number,
-  mediumQuestionsCount: number,
-  hardQuestionsCount: number,
-}
-
 export interface IOption {
   description: string,
   isCorrect: boolean
@@ -45,7 +36,7 @@ export interface IQuestionAndAnswer {
   question: string,
   answer: IAnswer,
 }
-export interface IQuestionBank {
+export interface IQuestionBankTopic {
   id: number,
   name: string,
   totalQuestions: number,
@@ -53,18 +44,23 @@ export interface IQuestionBank {
   mediumQuestionsCount: number,
   hardQuestionsCount: number,
 }
-
-export interface ISelectedQuestionBank extends IQuestionBank {
+export interface ISelectedQuestionBankTopic extends IQuestionBankTopic {
   selectedTotalQuestions: number
   selectedEasyQuestionsCount: number
   selectedMediumQuestionsCount: number
   selectedHardQuestionsCount: number
 }
+export interface IQuestionBank {
+  id: number,
+  name: string,
+  topics: ISelectedQuestionBankTopic[],
+}
+
 export interface ITestDetailsForm {
   testName: string
   testDescription: string
   totalQuestions: number
-  questionBanks: ISelectedQuestionBank[],
+  questionBankTopics: ISelectedQuestionBankTopic[],
 }
 
 export interface ITestEvaluationForm {

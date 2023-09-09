@@ -2,17 +2,19 @@ import { IHttpRequest } from "../interfaces/http";
 import { ICreateTestData } from "../interfaces/exam";
 
 import { examDb, questionDb } from "../db";
-import { getQuestionsFromBank } from "../handlers/examHandler";
+import { getQuestionsFromTopic } from "../handlers/examHandler";
 
 export const createExam = async (req: IHttpRequest) => {
   const testData:ICreateTestData = req.body.testData;
   const userId: number = req.body.userId;
 
   let questionIds:number[] = [];
-  await Promise.all(testData.testDetails.questionBanks.map(async (bank) => {
-    const newQuestionIds = await getQuestionsFromBank(bank);
+  const topics = testData.testDetails.questionBankTopics;
+
+  await Promise.all(topics.map(async (topic) => {
+    const newQuestionIds = await getQuestionsFromTopic(topic);
     questionIds = [...questionIds,...newQuestionIds];
-  }));
+  }))
 
   const exam = await examDb.createExam({userId,data:testData,questions:questionIds});
 

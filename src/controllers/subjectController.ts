@@ -1,5 +1,6 @@
+import { getTopic } from "../handlers/examHandler";
 import { subjectDb } from "../db";
-import { IQuestionBank, ISubject } from "../interfaces/exam";
+import { IQuestionBank, ISelectedQuestionBankTopic, ISubject } from "../interfaces/exam";
 import { IHttpRequest } from "../interfaces/http";
 
 export const createSubject = async (req: IHttpRequest) => {
@@ -57,18 +58,15 @@ export const getAllSubjects = async (req: IHttpRequest) => {
 export const getAllQuestionBanks = async (req: IHttpRequest) => {
   const data = await subjectDb.getAllQuestionBanks();
   // console.log(data);
-  const questionBanks:IQuestionBank[] = data.map(subject => {
+
+  const questionBanks:IQuestionBank[] = await Promise.all(data.map(async (subject) => {
+    const topics = await Promise.all(subject.topics.map(async (topic) => await getTopic(topic)));
     return {
       id: subject.id,
       name: subject.name,
-      totalQuestions:subject.topics.map(topic => topic.questions.length).reduce((prev,curr) => prev + curr, 0),
-      easyQuestionsCount: subject.topics.map(topic => topic.questions.filter(question => question.complexity === "easy").length).reduce((prev,curr) => prev + curr, 0),
-      mediumQuestionsCount: subject.topics.map(topic => topic.questions.filter(question => question.complexity === "medium").length).reduce((prev,curr) => prev + curr, 0),
-      hardQuestionsCount: subject.topics.map(topic => topic.questions.filter(question => question.complexity === "hard").length).reduce((prev,curr) => prev + curr, 0),
+      topics,
     }
-  }) ;
-
-  console.log(questionBanks);
+  }));
 
   return {
     statusCode: 200,

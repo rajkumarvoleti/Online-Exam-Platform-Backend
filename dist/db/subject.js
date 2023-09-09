@@ -156,17 +156,8 @@ function makeSubjectDb({ makeDb }) {
                     name: true,
                     topics: {
                         select: {
-                            questions: {
-                                where: {
-                                    isActive: true,
-                                },
-                                select: {
-                                    complexity: true,
-                                }
-                            }
-                        },
-                        orderBy: {
-                            updatedAt: "desc"
+                            id: true,
+                            name: true,
                         }
                     }
                 }
