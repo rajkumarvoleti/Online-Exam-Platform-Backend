@@ -19,7 +19,60 @@ function makeExamDb({ makeDb }) {
         const testEndDate = testSettings.testDateAvailability === "always" ? "always" : testSettings.testEndDate;
         const testStartTime = testSettings.testTimeAvailability === "always" ? "always" : testSettings.testStartTime;
         const testEndTime = testSettings.testTimeAvailability === "always" ? "always" : testSettings.testEndTime;
-        const exam = db.exam.create({
+        const exam = yield db.exam.create({
+            data: {
+                description: testDetails.testDescription,
+                name: testDetails.testName,
+                negativeMarks: testSettings.negativeMarks,
+                passPercentage: testSettings.passPercentage,
+                price: testPrice,
+                testDuration,
+                totalMarks: data.testSettings.totalMarks,
+                totalQuestions: data.testDetails.totalQuestions,
+                testStartDate,
+                testEndDate,
+                testStartTime,
+                testEndTime,
+                questions: {
+                    connect: questions.map(question => {
+                        return { id: question };
+                    }),
+                },
+                createdBy: {
+                    connect: { id: userId }
+                }
+            }
+        });
+        return exam;
+    });
+    const editExam = ({ id, userId, data, questions }) => __awaiter(this, void 0, void 0, function* () {
+        const { testDetails, testSettings, pricing } = data;
+        const testPrice = pricing.testType === "open" ? 0 : pricing.price;
+        const testDuration = testSettings.testDurationAvailability === "always" ? 0 : testSettings.testDuration;
+        const testStartDate = testSettings.testDateAvailability === "always" ? "always" : testSettings.testStartDate;
+        const testEndDate = testSettings.testDateAvailability === "always" ? "always" : testSettings.testEndDate;
+        const testStartTime = testSettings.testTimeAvailability === "always" ? "always" : testSettings.testStartTime;
+        const testEndTime = testSettings.testTimeAvailability === "always" ? "always" : testSettings.testEndTime;
+        const oldExam = yield db.exam.findUnique({
+            where: { id },
+            include: { questions: true },
+        });
+        if (!oldExam) {
+            throw new Error(`Exam with ID ${id} not found.`);
+        }
+        // Disconnect old questions by clearing the relationship
+        yield db.exam.update({
+            where: { id },
+            data: {
+                questions: {
+                    disconnect: oldExam.questions.map((question) => ({ id: question.id })),
+                },
+            },
+        });
+        const exam = yield db.exam.update({
+            where: {
+                id
+            },
             data: {
                 description: testDetails.testDescription,
                 name: testDetails.testName,
@@ -45,9 +98,27 @@ function makeExamDb({ makeDb }) {
         }).catch((e) => console.log(e));
         return exam;
     });
+    const getExamForEdit = (id) => __awaiter(this, void 0, void 0, function* () {
+        const exam = yield db.exam.findUnique({
+            where: { id },
+            include: {
+                questions: true,
+            }
+        });
+        return exam;
+    });
     const deleteAll = () => __awaiter(this, void 0, void 0, function* () {
         yield db.exam.deleteMany({
             where: {}
+        });
+    });
+    const deleteMany = (ids) => __awaiter(this, void 0, void 0, function* () {
+        yield db.exam.deleteMany({
+            where: {
+                id: {
+                    in: ids
+                }
+            }
         });
     });
     const getExam = (id) => __awaiter(this, void 0, void 0, function* () {
@@ -73,7 +144,7 @@ function makeExamDb({ makeDb }) {
         const exams = db.exam.findMany();
         return exams;
     });
-    return { createExam, getAllExams, deleteAll, getExam };
+    return { createExam, getAllExams, deleteAll, getExam, deleteMany, editExam, getExamForEdit };
 }
 exports.default = makeExamDb;
 //# sourceMappingURL=exam.js.map

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTopic = exports.getQuestionsCount = exports.getQuestionsFromTopic = void 0;
+exports.getQuestionBanksForEdit = exports.getSelectedTopicRecord = exports.getTopicIdAndComplexity = exports.getTopic = exports.getQuestionsCount = exports.getQuestionsFromTopic = void 0;
 const db_1 = require("../db");
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -56,4 +56,63 @@ const getTopic = ({ id, name }) => __awaiter(void 0, void 0, void 0, function* (
     };
 });
 exports.getTopic = getTopic;
+const getTopicIdAndComplexity = (questionIds) => __awaiter(void 0, void 0, void 0, function* () {
+    const topicIdAndComplexityArray = yield Promise.all(questionIds.map((id) => __awaiter(void 0, void 0, void 0, function* () {
+        const data = yield db_1.questionDb.getQuestion(id);
+        const topicAndCOmplexity = { complexity: data.complexity, topicId: data.topicId };
+        return topicAndCOmplexity;
+    })));
+    return topicIdAndComplexityArray;
+});
+exports.getTopicIdAndComplexity = getTopicIdAndComplexity;
+const getSelectedTopicRecord = (data) => {
+    const result = {};
+    for (const item of data) {
+        const { topicId, complexity } = item;
+        if (!result[topicId]) {
+            result[topicId] = { easyCount: 0, mediumCount: 0, hardCount: 0 };
+        }
+        switch (complexity) {
+            case 'easy':
+                result[topicId].easyCount++;
+                break;
+            case 'medium':
+                result[topicId].mediumCount++;
+                break;
+            case 'hard':
+                result[topicId].hardCount++;
+                break;
+            default:
+                break;
+        }
+    }
+    return result;
+};
+exports.getSelectedTopicRecord = getSelectedTopicRecord;
+const getQuestionBanksForEdit = (topicIdAndComplexityArray) => __awaiter(void 0, void 0, void 0, function* () {
+    const selectedTopicRecord = (0, exports.getSelectedTopicRecord)(topicIdAndComplexityArray);
+    const questionBankTopics = yield Promise.all(topicIdAndComplexityArray.map((data) => __awaiter(void 0, void 0, void 0, function* () {
+        const topic = yield db_1.topicDb.getTopic(data.topicId);
+        const { easyQuestionsCount, hardQuestionsCount, mediumQuestionsCount } = yield (0, exports.getQuestionsCount)(topic.id);
+        const selectedTopic = {
+            easyQuestionsCount,
+            hardQuestionsCount,
+            mediumQuestionsCount,
+            totalQuestions: easyQuestionsCount +
+                hardQuestionsCount +
+                mediumQuestionsCount,
+            id: topic.id,
+            name: topic.name,
+            selectedEasyQuestionsCount: selectedTopicRecord[topic.id].easyCount,
+            selectedMediumQuestionsCount: selectedTopicRecord[topic.id].mediumCount,
+            selectedHardQuestionsCount: selectedTopicRecord[topic.id].hardCount,
+            selectedTotalQuestions: selectedTopicRecord[topic.id].easyCount +
+                selectedTopicRecord[topic.id].mediumCount +
+                selectedTopicRecord[topic.id].hardCount,
+        };
+        return selectedTopic;
+    })));
+    return questionBankTopics;
+});
+exports.getQuestionBanksForEdit = getQuestionBanksForEdit;
 //# sourceMappingURL=examHandler.js.map
